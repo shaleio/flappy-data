@@ -1,0 +1,4 @@
+Flappy Data is a UI-only StrataBI "app" module (module_type multi_page_app) used as an
+extensibility sample. It renders a single page whose layout is a markdown explanation tile
+plus a raw_html tile hosting a self-contained HTML/JS game. It has no Lambda and no runtime
+data dependencies; do not generate queries, sources, or exec tiles for it.

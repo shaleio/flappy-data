@@ -1,0 +1,10 @@
+{
+  "module_id": "flappy-data",
+  "version": "1.0.0",
+  "entrypoint": "tofu",
+  "state_key": "flappy-data/module.tfstate",
+  "delivery": "local",
+  "supports_destroy": true,
+  "_comment": "Flappy Data — a UI-only sample app module. Its tofu uploads module.json to the StrataBI system bucket and writes a row in the module registry (no Lambda, no new infra). required_permissions is the simple broad form, limited to the two services the tofu touches.",
+  "required_permissions": ["s3", "dynamodb"]
+}
