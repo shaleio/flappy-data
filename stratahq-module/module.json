@@ -4,7 +4,7 @@
   "module_type": "multi_page_app",
   "label": "Flappy Data",
   "description": "A self-contained HTML game in a raw_html tile \u2014 a sample app module proving StrataBI hosts interactive apps with no backend, container, or infrastructure change.",
-  "version": "1.0.0",
+  "version": "1.7.0",
   "recommended_theme": "darkly",
   "navigation_type": "tabs",
   "service_dependencies": [

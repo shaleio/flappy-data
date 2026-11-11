@@ -1,0 +1,45 @@
+name: Publish to StrataHQ
+
+# Tag a release (e.g. v1.0.1) → the Flappy Data module bundle is signed + published to the HQ
+# catalog. No stored AWS keys: OIDC assumes the HQ publish role, scoped to tag refs.
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout StrataHQ publish scripts
+        uses: actions/checkout@v4
+        with:
+          repository: shaleio/stratahq
+          token: ${{ secrets.HQ_SCRIPTS_TOKEN }}   # read-only PAT with access to shaleio/stratahq
+          path: _hq
+      - name: Python + boto3 (for signing)
+        run: python3 -m pip install --quiet boto3
+      - name: AWS creds via OIDC (HQ publish role)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.HQ_PUBLISH_ROLE_ARN }}
+          aws-region: us-east-1
+      - name: Sync bundle version from tag
+        run: |
+          VER="${GITHUB_REF_NAME#v}"; [ "$GITHUB_REF_NAME" = "$GITHUB_REF" ] && VER="0.0.0-dev"
+          python3 - "$VER" <<'PY'
+          import json, sys
+          p = "stratahq-module/stratabi-module.json"
+          m = json.load(open(p)); m["version"] = sys.argv[1]
+          json.dump(m, open(p, "w"), indent=2)
+          # keep the app manifest version in lockstep
+          mp = "stratahq-module/module.json"; a = json.load(open(mp)); a["version"] = sys.argv[1]; json.dump(a, open(mp, "w"), indent=2)
+          print("version ->", sys.argv[1])
+          PY
+      - name: Publish module to HQ
+        run: bash _hq/stratahq/seed/publish_module.sh --dir stratahq-module --tofu-dir stratahq-module/tofu
